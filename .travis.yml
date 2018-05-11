@@ -25,6 +25,7 @@ notifications:
 branches:
   only:
     - master
+    - osxbuild
     - /^v\d+\.\d+(\.\d+)*(-\S*)?$/
 
 git:
