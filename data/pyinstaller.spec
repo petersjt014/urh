@@ -11,8 +11,8 @@ a = Analysis(['../src/urh/main.py'],
                        ( '/usr/local/lib/libmpfr.dylib', 'libmpfr.dylib'),
                        ( '/usr/local/lib/libgmp.dylib', 'libgmp.dylib'),
                        ( '/usr/local/lib/libisl.dylib', 'libisl.dylib'),
-                       ( '/usr/local/lib/libfftw3.dylib', 'libfftw3.dylib')
-                       ( '/usr/local/lib/libusb-1.0.0.dylib', 'libusb.dylib')
+                       ( '/usr/local/lib/libfftw3.dylib', 'libfftw3.dylib'),
+                       ( '/usr/local/lib/libusb-1.0.0.dylib', 'libusb.dylib'),
                        ( '/usr/local/lib/libuhd.dylib', 'libuhd.dylib' ),
                        ( '/usr/local/lib/libportaudio.dylib', 'libportaudio.dylib'),
                        ( '/usr/local/lib/libairspy.dylib', 'libairspy.dylib'),
