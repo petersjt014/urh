@@ -95,9 +95,9 @@ before_deploy:
     if [[ $TRAVIS_OS_NAME == "osx" ]]
     then
       brew install librtlsdr hackrf uhd portaudio airspy
-      python3 src/urh/cythonext/build.py
+      python3 src/urh/cythonext/build.py &> /tmp/build_log.txt
       pip3 install pyinstaller six packaging appdirs pyaudio
-      pyinstaller data/pyinstaller.spec
+      pyinstaller data/pyinstaller.spec &> /tmp/pyinstaller_log.txt
       hdiutil create -volname UniversalRadioHacker -srcfolder dist/Universal\ Radio\ Hacker.app/ -ov -format UDZO urh.dmg
     fi
 
