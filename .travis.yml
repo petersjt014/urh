@@ -105,8 +105,6 @@ deploy:
   file: urh.dmg
   skip_cleanup: true
   on:
-    branches:    
-      only:      
-        - osxbuild
+    branch: osxbuild
   #on:
   #  tags: true
