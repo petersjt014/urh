@@ -94,7 +94,7 @@ before_deploy:
   - |
     if [[ $TRAVIS_OS_NAME == "osx" ]]
     then
-      pip3 install pyinstaller
+      pip3 install pyinstaller six packaging appdirs
       pyinstaller data/pyinstaller.spec
       hdiutil create -volname UniversalRadioHacker -srcfolder dist/Universal\ Radio\ Hacker.app/ -ov -format UDZO urh.dmg
     fi
