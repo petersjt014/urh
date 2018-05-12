@@ -95,9 +95,9 @@ before_deploy:
     if [[ $TRAVIS_OS_NAME == "osx" ]]
     then
       brew tap pothosware/homebrew-pothos 
-      brew install librtlsdr hackrf uhd portaudio airspy limesuite &> /dev/null
-      python3 src/urh/cythonext/build.py &> /tmp/build_log.txt &> /dev/null
-      pip3 install pyinstaller six packaging appdirs pyaudio & /dev/null
+      brew install librtlsdr hackrf uhd portaudio airspy limesuite &> /tmp/log.txt
+      python3 src/urh/cythonext/build.py &> /tmp/build_log.txt &> /tmp/log.txt
+      pip3 install pyinstaller six packaging appdirs pyaudio & /tmp/log.txt
       pyinstaller data/pyinstaller.spec
       hdiutil create -volname UniversalRadioHacker -srcfolder dist/Universal\ Radio\ Hacker.app/ -ov -format UDZO urh.dmg
     fi
