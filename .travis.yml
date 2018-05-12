@@ -94,7 +94,7 @@ before_deploy:
   - |
     if [[ $TRAVIS_OS_NAME == "osx" ]]
     then
-      brew install librtlsdr hackrf uhd
+      brew install librtlsdr hackrf uhd portaudio airspy
       python3 src/urh/cythonext/build.py
       pip3 install pyinstaller six packaging appdirs pyaudio
       pyinstaller data/pyinstaller.spec
