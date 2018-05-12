@@ -5,7 +5,7 @@ block_cipher = None
 
 a = Analysis(['../src/urh/main.py'],
              pathex=['/Users/boss/urh/data'],
-             binaries=[],
+             binaries=[( '/usr/local/lib/librtlsdr.dylib', 'librtlsdr.dylib' )],
              datas=[('../src/urh/plugins/*.py', 'urh/plugins'),
                     ('../src/urh/plugins/InsertSine/*', 'urh/plugins/InsertSine'),
                     ('../src/urh/plugins/MessageBreak/*', 'urh/plugins/MessageBreak'),

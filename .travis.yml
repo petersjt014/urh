@@ -94,6 +94,8 @@ before_deploy:
   - |
     if [[ $TRAVIS_OS_NAME == "osx" ]]
     then
+      brew install librtlsdr
+      python3 src/urh/cythonext/build.py
       pip3 install pyinstaller six packaging appdirs
       pyinstaller data/pyinstaller.spec
       hdiutil create -volname UniversalRadioHacker -srcfolder dist/Universal\ Radio\ Hacker.app/ -ov -format UDZO urh.dmg
