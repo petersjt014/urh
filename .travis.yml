@@ -104,5 +104,9 @@ deploy:
   api_key: $GH_TOKEN
   file: urh.dmg
   skip_cleanup: true
+  on:
+    branches:    
+      only:      
+        - osxbuild
   #on:
   #  tags: true
