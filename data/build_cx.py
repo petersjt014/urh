@@ -123,5 +123,7 @@ def build_exe(build_cmd='build'):
 if __name__ == '__main__':
     if sys.platform == "win32":
         build_exe("bdist_msi")
+    elif sys.platform == "darwin":
+        build_exe("bdist_dmg")
     else:
         build_exe()
