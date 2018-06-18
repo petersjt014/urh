@@ -115,6 +115,8 @@ class CompareFrameController(QWidget):
         self.min_height = self.minimumHeight()
         self.max_height = self.maximumHeight()
 
+        self.old_reference_index = 0
+
         self.__set_decoding_error_label(None)
 
         self.__set_default_message_type_ui_status()
@@ -333,6 +335,7 @@ class CompareFrameController(QWidget):
             for msg in messages:
                 msg.decoder = decoding
 
+            self.ui.tblViewProtocol.zero_hide_offsets.clear()
             self.clear_search()
 
             selected = self.ui.tblViewProtocol.selectionModel().selection()
@@ -407,7 +410,7 @@ class CompareFrameController(QWidget):
     def add_protocol(self, protocol: ProtocolAnalyzer, group_id: int = 0) -> ProtocolAnalyzer:
         self.__protocols = None
         self.proto_tree_model.add_protocol(protocol, group_id)
-        protocol.qt_signals.protocol_updated.connect(self.set_shown_protocols)
+        protocol.qt_signals.protocol_updated.connect(self.on_protocol_updated)
         if protocol.signal:
             protocol.signal.sample_rate_changed.connect(self.set_shown_protocols)  # Refresh times
         protocol.qt_signals.show_state_changed.connect(self.set_shown_protocols)
@@ -815,8 +818,11 @@ class CompareFrameController(QWidget):
     def show_differences(self, show_differences: bool):
         if show_differences:
             if self.protocol_model.refindex == -1:
-                self.protocol_model.refindex = 0
+                self.protocol_model.refindex = self.old_reference_index
         else:
+            if self.protocol_model.refindex != -1:
+                self.old_reference_index = self.protocol_model.refindex
+
             self.ui.chkBoxShowOnlyDiffs.setChecked(False)
             self.protocol_model.refindex = -1
 
@@ -844,17 +850,12 @@ class CompareFrameController(QWidget):
     def show_only_labels(self):
         visible_columns = set()
         for msg in self.proto_analyzer.messages:
-            for lbl in msg.message_type:
-                if lbl.show:
-                    start, end = msg.get_label_range(lbl=lbl, view=self.ui.cbProtoView.currentIndex(),
-                                                     decode=True)
-                    visible_columns |= (set(range(start, end)))
+            for lbl in filter(lambda lbl: lbl.show, msg.message_type):
+                start, end = msg.get_label_range(lbl=lbl, view=self.ui.cbProtoView.currentIndex(), decode=True)
+                visible_columns |= set(range(start, end))
 
         for i in range(self.protocol_model.col_count):
-            if i in visible_columns:
-                self.ui.tblViewProtocol.showColumn(i)
-            else:
-                self.ui.tblViewProtocol.hideColumn(i)
+            self.ui.tblViewProtocol.setColumnHidden(i, i not in visible_columns)
 
     def show_only_diffs(self):
         visible_rows = [i for i in range(self.protocol_model.row_count) if not self.ui.tblViewProtocol.isRowHidden(i)
@@ -889,13 +890,12 @@ class CompareFrameController(QWidget):
                 self.ui.tblViewProtocol.hideColumn(j)
 
     def restore_visibility(self):
-        selected = self.ui.tblViewProtocol.selectionModel().selection()
-        """:type: QtWidgets.QItemSelection """
+        selected = self.ui.tblViewProtocol.selectionModel().selection() # type: QItemSelection
 
         for i in range(self.protocol_model.col_count):
             self.ui.tblViewProtocol.showColumn(i)
 
-        for lbl in self.proto_analyzer.protocol_labels:
+        for lbl in filter(lambda lbl: not lbl.show, self.proto_analyzer.protocol_labels):
             self.set_protocol_label_visibility(lbl)
 
         if not selected.isEmpty():
@@ -1391,12 +1391,15 @@ class CompareFrameController(QWidget):
     @pyqtSlot(int)
     def on_ref_index_changed(self, new_ref_index: int):
         if new_ref_index != -1:
-            i = 0
-            visible_protos = [proto for proto in self.protocol_list if proto.show]
-            for proto in visible_protos:
-                i += proto.num_messages
-                if i > new_ref_index:
-                    return
+            hide_correction = 0
+            for i in range(0, self.protocol_model.row_count):
+                if self.ui.tblViewProtocol.isRowHidden((new_ref_index+i) % self.protocol_model.row_count):
+                    hide_correction = 0
+                else:
+                    hide_correction = i
+                    break
+
+            self.protocol_model.refindex = (new_ref_index + hide_correction) % self.protocol_model.row_count
 
         self.set_show_only_status()
 
@@ -1430,3 +1433,8 @@ class CompareFrameController(QWidget):
         if link == "reset_filter":
             self.ui.lineEditSearch.clear()
             self.show_all_rows()
+
+    @pyqtSlot()
+    def on_protocol_updated(self):
+        self.set_shown_protocols()
+        self.ui.tblViewProtocol.zero_hide_offsets.clear()

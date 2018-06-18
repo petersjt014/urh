@@ -108,6 +108,8 @@ def get_save_file_name(initial_name: str, wav_only=False, caption="Save signal")
         name_filter = ""
     elif caption == "Save simulator profile":
         name_filter = "Simulator (*.sim.xml *.sim);;All files (*)"
+    elif caption == "Export spectrogram":
+        name_filter = "Frequency Time (*.ft);;Frequency Time Amplitude (*.fta)"
     else:
         name_filter = "Protocols (*.proto.xml *.proto);;All files (*)"
 
@@ -131,12 +133,13 @@ def get_save_file_name(initial_name: str, wav_only=False, caption="Save signal")
     return filename
 
 
-def save_data_dialog(signal_name: str, data, wav_only=False, parent=None) -> str:
+def save_data_dialog(signal_name: str, data, sample_rate=1e6, wav_only=False, parent=None) -> str:
     filename = get_save_file_name(signal_name, wav_only)
 
     if filename:
         try:
-            save_data(data, filename)
+            data = convert_data_to_format(data, filename)
+            save_data(data, filename, sample_rate=sample_rate)
         except Exception as e:
             QMessageBox.critical(parent, "Error saving signal", e.args[0])
             filename = None
@@ -146,10 +149,10 @@ def save_data_dialog(signal_name: str, data, wav_only=False, parent=None) -> str
     return filename
 
 
-def save_data(data, filename: str, sample_rate=1e6):
+def save_data(data, filename: str, sample_rate=1e6, num_channels=2):
     if filename.endswith(".wav"):
         f = wave.open(filename, "w")
-        f.setnchannels(2)
+        f.setnchannels(num_channels)
         f.setsampwidth(2)
         f.setframerate(sample_rate)
         f.writeframes(data)
@@ -174,18 +177,20 @@ def save_data(data, filename: str, sample_rate=1e6):
             rewrite_tar(archive)
 
 
-def save_signal(signal):
-    filename = signal.filename
+def convert_data_to_format(data: np.ndarray, filename: str):
     if filename.endswith(".wav"):
-        data = signal.wave_data
+        return (data.view(np.float32) * 32767).astype(np.int16)
     elif filename.endswith(".complex16u"):
-        data = (127.5 * (signal.data.view(np.float32) + 1.0)).astype(np.uint8)
+        return (127.5 * (data.view(np.float32) + 1.0)).astype(np.uint8)
     elif filename.endswith(".complex16s"):
-        data = (127.5 * ((signal.data.view(np.float32)) - 0.5 / 127.5)).astype(np.int8)
+        return (127.5 * ((data.view(np.float32)) - 0.5 / 127.5)).astype(np.int8)
     else:
-        data = signal.data
+        return data
 
-    save_data(data, filename, sample_rate=signal.sample_rate)
+
+def save_signal(signal):
+    data = convert_data_to_format(signal.data, signal.filename)
+    save_data(data, signal.filename, sample_rate=signal.sample_rate)
 
 
 def rewrite_zip(zip_name):
