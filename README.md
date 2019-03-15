@@ -74,6 +74,7 @@ For the following linux distributions you can install URH using your package man
 |  Gentoo / Pentoo  | ``` emerge -av urh ``` |
 | Fedora 25+ | ``` dnf install urh ```  |
 | openSUSE  | ``` zypper install urh ```  |
+| NixOS  | ``` nix-env -iA nixos.urh ```  |
 
 
 ### Generic way with pip (Ubuntu/Debian)
